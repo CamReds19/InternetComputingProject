@@ -15,32 +15,33 @@ function getDataInfo() {
     var z = url_string.split("&");
     return z;
 }
-function updateChatInfo(array) {
-    var u = array[0].split("=");
-    var r = array[2].split("=");
+function updateChatInfo(room, username) {
+    // var u = array[0].split("=");
+    // var r = array[2].split("=");
 
-    name = u[1];
-    room = r[1];
+    // name = u[1];
+    // room = r[1];
 
     // console.log("username", username);
 
-    userList.appendChild(document.createTextNode(name));
+    userList.appendChild(document.createTextNode(username));
     roomName.innerHTML = room;
 }
 
 const socket = io();
 
-var array = getDataInfo();
-updateChatInfo(array);
+// var array = getDataInfo();
+// updateChatInfo(array);
 
-console.log(name, array);
+// console.log(name, array);
 
 socket.emit('joinRoom', { user:name, room:room });
 
 // get room and users
 socket.on('roomUsers', ({room, users}) => {
+    console.log("roomUSERS", users);
     var array = getDataInfo();
-    updateChatInfo(array);
+    updateChatInfo(room, users);
     outputUsers(users);
 });
 
