@@ -3,12 +3,15 @@ const socketio = require('socket.io');
 const http = require('http');
 const express = require('express');
 const moment = require('moment');
+const mongo = require('mongodb').MongoClient;
 
 const users = [];
 
 const app = express();
 const server = http.createServer(app);
 const io = socketio(server);
+
+var MongoClient = require('mongodb').MongoClient;
 
 app.use(express.static(path.join(__dirname, 'public')));
 
@@ -43,6 +46,22 @@ io.on('connection', socket => {
         io.to(user.room).emit('message', user.username+ '   ' + msg);
 
         console.log("MSG:::", msg);
+
+        MongoClient.connect("mongodb://127.0.0.1:27017/chatdb",{useNewUrlParser: true, useUnifiedTopology: true}, function (err, db) {
+                    if (err) throw err;
+                    var dbo = db.db("chatdb");
+                    var objName = {name: user.username};
+                    var objMsg = {message: msg.utf8Data};
+
+                    dbo.collection("users").insertOne(objName, function(err, resName) {
+                        if (err) throw err;
+                        console.log("username inserted", resName)
+                    });
+                    dbo.collection("messages").insertOne(objMsg, function(err, resMsg) {
+                        if (err) throw err;
+                        console.log("message inserted", resMsg)
+                    });
+        });
     });
 
     // runs when client disconnects
